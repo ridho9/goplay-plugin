@@ -20,6 +20,13 @@ defmodule GoplayPluginWeb.Router do
     get "/", PageController, :index
   end
 
+  scope "/tools", GoplayPluginWeb.Tools do
+    pipe_through :browser
+
+    live "/chat", ChatLive
+    live "/chat/app", ChatAppLive
+  end
+
   # Other scopes may use custom stacks.
   scope "/api", GoplayPluginWeb do
     pipe_through :api

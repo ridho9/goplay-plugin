@@ -1,11 +1,11 @@
-<main class="container">
-  <p class="alert alert-info" role="alert"
+<main>
+  <div class="relative flex justify-center">
+    <p class="absolute mt-4 alert alert-info" role="alert"
     phx-click="lv:clear-flash"
     phx-value-key="info"><%= live_flash(@flash, :info) %></p>
-
-  <p class="alert alert-danger" role="alert"
+    <p class="absolute mt-4 alert alert-danger" role="alert"
     phx-click="lv:clear-flash"
     phx-value-key="error"><%= live_flash(@flash, :error) %></p>
-
+  </div>
   <%= @inner_content %>
 </main>
