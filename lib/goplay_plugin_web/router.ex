@@ -14,6 +14,10 @@ defmodule GoplayPluginWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :secured do
+    plug :basic_auth, username: "admin", password: "admin"
+  end
+
   scope "/", GoplayPluginWeb do
     pipe_through :browser
 
@@ -39,12 +43,18 @@ defmodule GoplayPluginWeb.Router do
   # If your application does not have an admins-only section yet,
   # you can use Plug.BasicAuth to set up some basic authentication
   # as long as you are also using SSL (which you should anyway).
-  if Mix.env() in [:dev, :test] do
-    import Phoenix.LiveDashboard.Router
+  # if Mix.env() in [:dev, :test] do
 
-    scope "/" do
-      pipe_through :browser
-      live_dashboard "/dashboard", metrics: GoplayPluginWeb.Telemetry
+  import Phoenix.LiveDashboard.Router
+
+  scope "/" do
+    if Mix.env() not in [:dev, :test] do
+      pipe_through :secured
     end
+
+    pipe_through :browser
+    live_dashboard "/dashboard", metrics: GoplayPluginWeb.Telemetry
   end
+
+  # end
 end

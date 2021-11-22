@@ -20,7 +20,7 @@ defmodule GoplayPlugin.MixProject do
   def application do
     [
       mod: {GoplayPlugin.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :os_mon]
     ]
   end
 
@@ -44,7 +44,12 @@ defmodule GoplayPlugin.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
+      # {:cowlib, "~> 2.11", override: true},
       {:cookie_monster, "~> 0.1.1"},
+      # {:gun, "~> 2.0-pre"},
+      # {:socket, "~> 0.3"},
+      # {:certifi, "~> 2.8"},
+      {:websockex, "~> 0.4.3"},
       {:httpoison, "~> 1.8"}
     ]
   end
