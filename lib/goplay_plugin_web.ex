@@ -65,7 +65,6 @@ defmodule GoplayPluginWeb do
       import Plug.Conn
       import Phoenix.Controller
       import Phoenix.LiveView.Router
-      import Plug.BasicAuth, only: [basic_auth: 2]
     end
   end
 
