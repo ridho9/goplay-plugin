@@ -1,4 +1,17 @@
-<%= if @event.status == "finished" do %>
+<%= if @status == "finished" do %>
   <p>Event is finished</p>
 <% end %>
-<p><%= inspect(@chat) %></p>
+
+
+<div class="static">
+  <div id="chat-messages" phx-update="append" class="fixed bottom-0 left-0">
+    <%= for chat <- @chats do %>
+      <%= if chat.type == :message do %>
+        <div id={chat.id} class="chat-message border rounded p-1 my-1 mx-1 w-96">
+          <p class="chat-message-sender"><%= chat.from %></p>
+          <p class="chat-message-message"><%= chat.msg %></p>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

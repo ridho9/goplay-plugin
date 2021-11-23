@@ -18,12 +18,13 @@ defmodule GoplayPlugin.WS.Vanguard do
   end
 
   def handle_connect(_conn, state) do
+    Logger.info("vg connect")
     Process.send_after(self(), :monitor, 1000)
     {:ok, state}
   end
 
   def handle_disconnect(_, state) do
-    Logger.info("disconnect")
+    Logger.info("vg disconnect")
     {:ok, state}
   end
 
@@ -62,12 +63,13 @@ defmodule GoplayPlugin.WS.Vanguard do
       username: username
     }
 
+    Logger.info("vg joined chat")
     GenServer.cast(state.callback_pid, {:chat_fetched, chat})
     state = Map.put(state, :chat, chat)
     {:ok, state}
   end
 
-  def handle_text_message(msg, state) do
+  def handle_text_message(_msg, state) do
     {:ok, state}
   end
 
@@ -78,7 +80,7 @@ defmodule GoplayPlugin.WS.Vanguard do
 
   def handle_info(:monitor, state) do
     {:links, links} = Process.info(self(), :links)
-    Logger.info("links #{inspect(links)}")
+    Logger.info("vg links #{inspect(links)}")
 
     if links == [] do
       {:close, state}
@@ -89,7 +91,7 @@ defmodule GoplayPlugin.WS.Vanguard do
   end
 
   def terminate(reason, _state) do
-    Logger.info("terminate #{reason}")
+    Logger.info("vg terminate #{reason}")
     exit(:normal)
   end
 end

@@ -1,6 +1,9 @@
 defmodule GoplayPluginWeb.Tools.ChatAppLive do
-  alias GoplayPlugin.WS.Vanguard
   use GoplayPluginWeb, :live_view
+  require Logger
+
+  alias GoplayPlugin.WS.Vanguard
+  alias GoplayPlugin.WS.Chat
 
   def mount(
         %{"host" => host, "slug" => slug},
@@ -8,28 +11,50 @@ defmodule GoplayPluginWeb.Tools.ChatAppLive do
         socket
       ) do
     socket =
+      assign(socket,
+        host: "",
+        slug: "",
+        event: %{},
+        page_title: "Chat",
+        vanguard: nil,
+        chat_ws: nil,
+        chat_setting: %{},
+        chats: []
+      )
+
+    socket =
       case GoplayPlugin.API.Goplay.event_details(host, slug) do
         {:ok, event} ->
           event = %{title: event["title"], status: event["status"], guard_url: event["guard_url"]}
 
-          {:ok, vg} = Vanguard.start_link(event.guard_url, self())
-          GenServer.cast(self(), :chat_fetch)
+          if event.status != "finished" do
+            GenServer.cast(self(), :connect_vg)
+          end
 
           assign(socket,
             host: host,
             slug: slug,
             event: event,
             page_title: event.title,
-            vanguard: vg,
-            chat: %{}
+            vanguard: nil,
+            chat_ws: nil,
+            chat_setting: %{},
+            chats: [],
+            status: event.status
           )
 
         {:error, err} ->
           put_flash(socket, :error, err)
-          |> assign(page_title: "Chat")
       end
 
-    {:ok, socket}
+    {:ok, socket, temporary_assigns: [chats: []]}
+  end
+
+  def handle_cast(:connect_vg, %{assigns: %{event: event}} = socket) do
+    {:ok, vg} = Vanguard.start_link(event.guard_url, self())
+    Logger.info("chatapp started vg #{inspect(vg)}")
+    GenServer.cast(self(), :chat_fetch)
+    {:noreply, assign(socket, vanguard: vg)}
   end
 
   def handle_cast(:chat_fetch, %{assigns: %{vanguard: vg}} = socket) do
@@ -37,9 +62,47 @@ defmodule GoplayPluginWeb.Tools.ChatAppLive do
     {:noreply, socket}
   end
 
-  def handle_cast({:chat_fetched, chat}, %{assigns: %{vanguard: vg}} = socket) do
-    socket = assign(socket, chat: chat)
+  def handle_cast({:chat_fetched, chat}, %{assigns: %{vanguard: vg, host: host}} = socket) do
+    chat_url =
+      if host == "goplay.co.id" do
+        "wss://gschat.goplay.co.id/chat"
+      else
+        "wss://g-gschat.goplay.co.id/chat"
+      end
+
+    chat = Map.put(chat, :url, chat_url)
+
+    socket = assign(socket, chat_setting: chat)
     GenServer.stop(vg)
+    GenServer.cast(self(), :chat_connect)
+    {:noreply, socket}
+  end
+
+  def handle_cast(:chat_connect, %{assigns: %{chat_setting: setting}} = socket) do
+    {:ok, chat_ws} = Chat.start_link(setting.url, self(), setting)
+    socket = assign(socket, chat_ws: chat_ws)
+    GenServer.cast(self(), :chat_join)
+    {:noreply, socket}
+  end
+
+  def handle_cast(:chat_join, %{assigns: %{chat_ws: ws, chat_setting: setting}} = socket) do
+    Chat.join(ws, setting)
+    {:noreply, socket}
+  end
+
+  def handle_cast({:chat_received, received}, socket) do
+    handle_chat(received, socket)
+  end
+
+  def handle_chat(
+        %{"ct" => 20, "id" => id, "msg" => msg, "frm" => frm},
+        socket
+      ) do
+    chat = %{id: "chat-#{id}", type: :message, msg: msg, from: frm}
+    {:noreply, assign(socket, chats: [chat])}
+  end
+
+  def handle_chat(_, socket) do
     {:noreply, socket}
   end
 end
