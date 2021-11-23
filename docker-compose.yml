@@ -1,0 +1,22 @@
+version: "2.0"
+services:
+    gpt:
+        build: .
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.hibiki.rule=Host(`gp.ridho.dev`)"
+            - "traefik.http.routers.hibiki.entrypoints=websecure"
+            - "traefik.http.routers.hibiki.tls.certresolver=myresolver"
+            - "traefik.docker.network=global"
+        env_file:
+            - prod.env
+        networks:
+            global:
+                aliases:
+                    - gpt
+        volumes:
+            - ./data:/app/data
+
+networks:
+    global:
+        external: true

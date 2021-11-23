@@ -19,6 +19,12 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
+  dashboard_password =
+    System.get_env("DASHBOARD_PASSWORD") ||
+      raise """
+      environment variable DASHBOARD_PASSWORD is missing.
+      """
+
   config :goplay_plugin, GoplayPluginWeb.Endpoint,
     http: [
       # Enable IPv6 and bind on all interfaces.
@@ -28,14 +34,15 @@ if config_env() == :prod do
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
       port: String.to_integer(System.get_env("PORT") || "4000")
     ],
-    secret_key_base: secret_key_base
+    secret_key_base: secret_key_base,
+    dashboard_password: dashboard_password
 
   # ## Using releases
   #
   # If you are doing OTP releases, you need to instruct Phoenix
   # to start each relevant endpoint:
   #
-  #     config :goplay_plugin, GoplayPluginWeb.Endpoint, server: true
+  config :goplay_plugin, GoplayPluginWeb.Endpoint, server: true
   #
   # Then you can assemble a release by calling `mix release`.
   # See `mix help release` for more information.

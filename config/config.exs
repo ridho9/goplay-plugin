@@ -12,7 +12,8 @@ config :goplay_plugin, GoplayPluginWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [view: GoplayPluginWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: GoplayPlugin.PubSub,
-  live_view: [signing_salt: "WymrxwtFNyUg+OSxFIc4KxRZHbKZe6o2"]
+  live_view: [signing_salt: "WymrxwtFNyUg+OSxFIc4KxRZHbKZe6o2"],
+  dashboard_password: ""
 
 # Configure esbuild (the version is required)
 config :esbuild,

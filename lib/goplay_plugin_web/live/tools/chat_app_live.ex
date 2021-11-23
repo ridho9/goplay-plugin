@@ -1,5 +1,4 @@
 defmodule GoplayPluginWeb.Tools.ChatAppLive do
-  alias Phoenix.LiveView.JS
   use GoplayPluginWeb, :live_view
   require Logger
 

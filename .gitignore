@@ -32,3 +32,4 @@ goplay_plugin-*.tar
 npm-debug.log
 /assets/node_modules/
 
+prod.env
