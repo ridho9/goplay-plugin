@@ -34,8 +34,10 @@ if config_env() == :prod do
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
       port: String.to_integer(System.get_env("PORT") || "4000")
     ],
-    secret_key_base: secret_key_base,
-    dashboard_password: dashboard_password
+    secret_key_base: secret_key_base
+
+  config :goplay_plugin,
+    dashboard_password: ""
 
   # ## Using releases
   #

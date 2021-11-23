@@ -15,7 +15,9 @@ defmodule GoplayPluginWeb.Router do
   end
 
   pipeline :secured do
-    plug :basic_auth, username: "admin", password: "admin"
+    plug :basic_auth,
+      username: "admin",
+      password: Application.fetch_env!(:goplay_plugin, :dashboard_password)
   end
 
   scope "/", GoplayPluginWeb do
