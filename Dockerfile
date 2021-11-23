@@ -19,6 +19,7 @@ RUN mix deps.compile
 COPY priv ./priv
 
 COPY assets ./assets
+RUN mix npmi
 RUN mix assets.deploy
 
 COPY lib ./lib

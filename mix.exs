@@ -44,11 +44,7 @@ defmodule GoplayPlugin.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      # {:cowlib, "~> 2.11", override: true},
       {:cookie_monster, "~> 0.1.1"},
-      # {:gun, "~> 2.0-pre"},
-      # {:socket, "~> 0.3"},
-      # {:certifi, "~> 2.8"},
       {:websockex, "~> 0.4.3"},
       {:httpoison, "~> 1.8"}
     ]
@@ -62,7 +58,8 @@ defmodule GoplayPlugin.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get"],
+      setup: ["deps.get", "npmi"],
+      npmi: ["cmd --cd assets npm install"],
       "assets.deploy": [
         "cmd --cd assets npm run deploy",
         "esbuild default --minify",
