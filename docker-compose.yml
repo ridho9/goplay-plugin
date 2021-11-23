@@ -4,9 +4,9 @@ services:
         build: .
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.hibiki.rule=Host(`gp.ridho.dev`)"
-            - "traefik.http.routers.hibiki.entrypoints=websecure"
-            - "traefik.http.routers.hibiki.tls.certresolver=myresolver"
+            - "traefik.http.routers.gpt.rule=Host(`gp.ridho.dev`)"
+            - "traefik.http.routers.gpt.entrypoints=websecure"
+            - "traefik.http.routers.gpt.tls.certresolver=myresolver"
             - "traefik.docker.network=global"
         env_file:
             - prod.env
