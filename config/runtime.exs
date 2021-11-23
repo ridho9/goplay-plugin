@@ -37,7 +37,7 @@ if config_env() == :prod do
     secret_key_base: secret_key_base
 
   config :goplay_plugin,
-    dashboard_password: ""
+    dashboard_password: dashboard_password
 
   # ## Using releases
   #
