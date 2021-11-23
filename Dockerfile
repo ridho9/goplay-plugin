@@ -37,7 +37,7 @@ RUN apk add --no-cache openssl ncurses-libs bash file curl libstdc++
 WORKDIR /app
 COPY --from=builder /src/_build/prod/rel/goplay_plugin/ .
 
-EXPOSE 80
+EXPOSE 4000
 
 ENTRYPOINT ["/app/bin/goplay_plugin"]
 CMD ["start"]
