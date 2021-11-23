@@ -19,10 +19,10 @@ RUN mix deps.compile
 COPY priv ./priv
 
 COPY assets ./assets
+COPY lib ./lib
+
 RUN mix npmi
 RUN mix assets.deploy
-
-COPY lib ./lib
 RUN mix compile
 
 COPY config/runtime.exs ./config
