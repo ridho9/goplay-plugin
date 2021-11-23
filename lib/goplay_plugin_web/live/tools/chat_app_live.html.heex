@@ -1,17 +1,37 @@
-<%= if @status == "finished" do %>
-  <p>Event is finished</p>
-<% end %>
+<div class="fixed top-0 right-0 border rounded bg-white p-1 max-w-xs">
+  <p>Plugin Control</p>
+
+  <p>Event: <%= @slug %></p>
+
+  <p phx-change="hello">Showing message: <%= @switch["message"] %></p>
+  <button class="border rounded p-1" phx-click="toggle-switch" phx-value-key="message">Toggle message</button>
+
+  <p>Showing gift: <%= @switch["gift"] %></p>
+  <button class="border rounded p-1" phx-click="toggle-switch" phx-value-key="gift">Toggle gift</button>
+
+  <%= if @status == "finished" do %>
+    <p>Event is finished</p>
+  <% end %>
+</div>
 
 
-<div class="static">
-  <div id="chat-messages" phx-update="append" class="fixed bottom-0 left-0">
-    <%= for chat <- @chats do %>
-      <%= if chat.type == :message do %>
-        <div id={chat.id} class="chat-message border rounded p-1 my-1 mx-1 w-96">
-          <p class="chat-message-sender"><%= chat.from %></p>
-          <p class="chat-message-message"><%= chat.msg %></p>
-        </div>
-      <% end %>
+<div id="chat-messages" class="fixed bottom-0 left-0">
+  <%= for chat <- @chats do %>
+    <%= cond do %>
+    <% chat.type == "message" and @switch["message"] -> %>
+      <div id={chat.id} class="chat-message border rounded p-1 my-1 mx-1 max-w-xs bg-white" >
+        <p class="chat-message-sender font-bold"><%= chat.from %></p>
+        <p class="chat-message-message"><%= chat.msg %></p>
+      </div>
+    <% chat.type == "gift" and @switch["gift"] -> %>
+      <div id={chat.id} class="gift-message border rounded p-1 my-1 mx-1 max-w-xs bg-white">
+        <p class="chat-message-sender font-bold"><%= chat.from %></p>
+        <p>mengirimkan <%= chat.title %></p>
+        <img class="chat-message-icon w-32" src={chat.icon} alt={chat.title}>
+        <p class="chat-message-message"><%= chat.msg %></p>
+      </div>
+    <% true -> %>
+      <div></div>
     <% end %>
-  </div>
+  <% end %>
 </div>

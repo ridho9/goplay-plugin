@@ -1,4 +1,5 @@
 defmodule GoplayPluginWeb.Tools.ChatAppLive do
+  alias Phoenix.LiveView.JS
   use GoplayPluginWeb, :live_view
   require Logger
 
@@ -19,7 +20,12 @@ defmodule GoplayPluginWeb.Tools.ChatAppLive do
         vanguard: nil,
         chat_ws: nil,
         chat_setting: %{},
-        chats: []
+        chats: [],
+        update_counter: 0,
+        switch: %{
+          "message" => true,
+          "gift" => true
+        }
       )
 
     socket =
@@ -27,7 +33,7 @@ defmodule GoplayPluginWeb.Tools.ChatAppLive do
         {:ok, event} ->
           event = %{title: event["title"], status: event["status"], guard_url: event["guard_url"]}
 
-          if event.status != "finished" do
+          if event.status != "finished" and connected?(socket) do
             GenServer.cast(self(), :connect_vg)
           end
 
@@ -47,7 +53,8 @@ defmodule GoplayPluginWeb.Tools.ChatAppLive do
           put_flash(socket, :error, err)
       end
 
-    {:ok, socket, temporary_assigns: [chats: []]}
+    # {:ok, socket, temporary_assigns: [chats: []]}
+    {:ok, socket}
   end
 
   def handle_cast(:connect_vg, %{assigns: %{event: event}} = socket) do
@@ -98,11 +105,58 @@ defmodule GoplayPluginWeb.Tools.ChatAppLive do
         %{"ct" => 20, "id" => id, "msg" => msg, "frm" => frm},
         socket
       ) do
-    chat = %{id: "chat-#{id}", type: :message, msg: msg, from: frm}
-    {:noreply, assign(socket, chats: [chat])}
+    chat = %{
+      id: "chat-#{id}",
+      type: "message",
+      msg: msg,
+      from: frm,
+      show: socket.assigns.switch["message"]
+    }
+
+    {:noreply,
+     update(socket, :chats, fn chats ->
+       chats ++ [chat]
+     end)}
   end
 
-  def handle_chat(_, socket) do
+  def handle_chat(
+        %{
+          "ct" => 82,
+          "id" => id,
+          "message" => msg,
+          "frm" => frm,
+          "icon" => icon,
+          "price" => price,
+          "title_id" => title
+        },
+        socket
+      ) do
+    chat = %{
+      id: "gift-#{id}",
+      type: "gift",
+      msg: msg,
+      from: frm,
+      icon: icon,
+      price: price,
+      title: title
+    }
+
+    {:noreply,
+     update(socket, :chats, fn chats ->
+       chats ++ [chat]
+     end)}
+  end
+
+  def handle_chat(_item, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("toggle-switch", %{"key" => key}, socket) do
+    socket =
+      update(socket, :switch, fn switch ->
+        %{switch | key => !switch[key]}
+      end)
+
     {:noreply, socket}
   end
 end

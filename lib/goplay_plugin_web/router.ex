@@ -27,6 +27,7 @@ defmodule GoplayPluginWeb.Router do
   scope "/tools", GoplayPluginWeb.Tools do
     pipe_through :browser
 
+    get "/", HomeController, :index
     live "/chat", ChatLive
     live "/chat/app", ChatAppLive
   end
