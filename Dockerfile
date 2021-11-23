@@ -1,5 +1,7 @@
 FROM hexpm/elixir:1.12.3-erlang-24.1.6-alpine-3.13.6 as builder
 
+RUN apk add --no-cache npm
+
 ARG MIX_ENV=prod
 
 WORKDIR /src
@@ -8,16 +10,23 @@ RUN mix local.hex --force && \
     mix local.rebar --force
 
 COPY mix.exs mix.lock ./
+RUN mix do deps.get --only ${MIX_ENV} 
+RUN mkdir config
 
-RUN mix do deps.get --only ${MIX_ENV}, deps.compile
+COPY config/config.exs config/$MIX_ENV.exs config/
+RUN mix deps.compile
 
-COPY assets ./assets
-COPY config ./config
-COPY lib ./lib
 COPY priv ./priv
 
+COPY assets ./assets
+RUN mix assets.deploy
+
+COPY lib ./lib
+RUN mix compile
+
+COPY config/runtime.exs ./config
+
 RUN mix do release
-# RUN mix do deps.get --only ${MIX_ENV}, release
 
 # ===========================================
 
