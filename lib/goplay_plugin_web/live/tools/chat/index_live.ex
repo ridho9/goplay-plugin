@@ -1,4 +1,4 @@
-defmodule GoplayPluginWeb.Tools.ChatLive do
+defmodule GoplayPluginWeb.Tools.Chat.IndexLive do
   use GoplayPluginWeb, :live_view
 
   def mount(_params, _session, socket) do
@@ -14,7 +14,7 @@ defmodule GoplayPluginWeb.Tools.ChatLive do
         case GoplayPlugin.API.Goplay.event_details(host, slug) do
           {:ok, _} ->
             redirect_url =
-              Routes.live_path(socket, GoplayPluginWeb.Tools.ChatAppLive, slug: slug, host: host)
+              Routes.live_path(socket, GoplayPluginWeb.Tools.Chat.AppLive, slug: slug, host: host)
 
             socket = push_redirect(socket, to: redirect_url)
             {:noreply, socket}

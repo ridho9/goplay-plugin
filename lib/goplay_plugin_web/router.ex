@@ -28,8 +28,11 @@ defmodule GoplayPluginWeb.Router do
     pipe_through :browser
 
     get "/", HomeController, :index
-    live "/chat", ChatLive
-    live "/chat/app", ChatAppLive
+
+    scope "/chat", Chat do
+      live "/", IndexLive
+      live "/app", AppLive
+    end
   end
 
   # Other scopes may use custom stacks.

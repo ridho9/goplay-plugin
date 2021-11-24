@@ -1,4 +1,4 @@
-defmodule GoplayPluginWeb.Tools.ChatAppLive do
+defmodule GoplayPluginWeb.Tools.Chat.AppLive do
   use GoplayPluginWeb, :live_view
   require Logger
 
