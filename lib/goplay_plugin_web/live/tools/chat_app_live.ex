@@ -50,6 +50,7 @@ defmodule GoplayPluginWeb.Tools.ChatAppLive do
 
         {:error, err} ->
           put_flash(socket, :error, err)
+          |> assign(status: "invalid")
       end
 
     # {:ok, socket, temporary_assigns: [chats: []]}
@@ -78,7 +79,7 @@ defmodule GoplayPluginWeb.Tools.ChatAppLive do
 
     chat = Map.put(chat, :url, chat_url)
 
-    socket = assign(socket, chat_setting: chat)
+    socket = assign(socket, chat_setting: chat, vanguard: nil)
     GenServer.stop(vg)
     GenServer.cast(self(), :chat_connect)
     {:noreply, socket}

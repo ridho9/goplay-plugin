@@ -2,15 +2,23 @@
   <p>Plugin Control</p>
 
   <p>Event: <%= @slug %></p>
-
-  <p phx-change="hello">Showing message: <%= @switch["message"] %></p>
-  <button class="border rounded p-1" phx-click="toggle-switch" phx-value-key="message">Toggle message</button>
-
-  <p>Showing gift: <%= @switch["gift"] %></p>
-  <button class="border rounded p-1" phx-click="toggle-switch" phx-value-key="gift">Toggle gift</button>
-
   <%= if @status == "finished" do %>
     <p>Event is finished</p>
+  <% else %>
+    <%= if @vanguard != nil do %>
+      <p>VG connecting</p>
+    <% end %>
+    <%= if @chat_setting == %{} do %>
+      <p>Loading chat setting...</p>
+    <% else %>
+      <p>Chat loaded</p>
+    <% end %>
+
+    <p phx-change="hello">Showing message: <%= @switch["message"] %></p>
+    <button class="border rounded p-1" phx-click="toggle-switch" phx-value-key="message">Toggle message</button>
+
+    <p>Showing gift: <%= @switch["gift"] %></p>
+    <button class="border rounded p-1" phx-click="toggle-switch" phx-value-key="gift">Toggle gift</button>
   <% end %>
 </div>
 
