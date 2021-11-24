@@ -33,6 +33,11 @@ defmodule GoplayPluginWeb.Router do
       live "/", IndexLive
       live "/app", AppLive
     end
+
+    scope "/vote", Vote do
+      live "/", IndexLive
+      live "/app", AppLive
+    end
   end
 
   # Other scopes may use custom stacks.

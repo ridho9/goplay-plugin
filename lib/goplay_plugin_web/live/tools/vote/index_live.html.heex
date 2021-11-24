@@ -1,0 +1,12 @@
+<div class="mb-2">
+  <h1 class="text-xl">Vote Tool</h1>
+</div>
+<.form let={f} for={:input} phx-submit="run">
+  <div class="mb-1">
+    <%= label f, :event_url, "Event URL", class: "block" %>
+    <%= text_input f, :event_url, class: "block border rounded w-1/2", required: true %>
+  </div>
+  <div class="mt-2">
+    <%= submit "Run", class: "border rounded p-1" %>
+  </div>
+</.form>
