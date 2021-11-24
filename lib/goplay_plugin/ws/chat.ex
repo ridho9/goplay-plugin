@@ -2,15 +2,22 @@ defmodule GoplayPlugin.WS.Chat do
   use WebSockex
   require Logger
 
-  def start_link(url, callback_pid, setting) do
+  def start_link(setting, callback_pid) do
     ssl_opts = [
       verify: :verify_none,
       versions: [:"tlsv1.1"],
       ciphers: :ssl.cipher_suites(:all, :"tlsv1.1")
     ]
 
+    chat_url =
+      if setting.event_host == "goplay.co.id" do
+        "wss://gschat.goplay.co.id/chat"
+      else
+        "wss://g-gschat.goplay.co.id/chat"
+      end
+
     WebSockex.start_link(
-      url,
+      chat_url,
       __MODULE__,
       %{callback_pid: callback_pid, setting: setting},
       ssl_options: ssl_opts
@@ -49,7 +56,7 @@ defmodule GoplayPlugin.WS.Chat do
       ct: 10,
       room_id: setting.room_id,
       token: setting.token,
-      recon: false
+      recon: setting.recon
     }
 
     send_message(pid, msg)

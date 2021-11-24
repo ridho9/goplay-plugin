@@ -70,14 +70,7 @@ defmodule GoplayPluginWeb.Tools.Chat.AppLive do
   end
 
   def handle_cast({:chat_fetched, chat}, %{assigns: %{vanguard: vg, host: host}} = socket) do
-    chat_url =
-      if host == "goplay.co.id" do
-        "wss://gschat.goplay.co.id/chat"
-      else
-        "wss://g-gschat.goplay.co.id/chat"
-      end
-
-    chat = Map.put(chat, :url, chat_url)
+    chat = Map.put(chat, :event_host, host)
 
     socket = assign(socket, chat_setting: chat, vanguard: nil)
     GenServer.stop(vg)
@@ -86,7 +79,7 @@ defmodule GoplayPluginWeb.Tools.Chat.AppLive do
   end
 
   def handle_cast(:chat_connect, %{assigns: %{chat_setting: setting}} = socket) do
-    {:ok, chat_ws} = Chat.start_link(setting.url, self(), setting)
+    {:ok, chat_ws} = Chat.start_link(setting, self())
     socket = assign(socket, chat_ws: chat_ws)
     GenServer.cast(self(), :chat_join)
     {:noreply, socket}
