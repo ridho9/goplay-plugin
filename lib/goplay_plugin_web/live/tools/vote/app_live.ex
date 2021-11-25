@@ -15,10 +15,14 @@ defmodule GoplayPluginWeb.Tools.Vote.AppLive do
         host: "",
         slug: "",
         event: %{},
-        page_title: "Chat",
+        page_title: "Vote",
         vanguard: nil,
         chat_ws: nil,
-        chat_setting: %{}
+        chat_setting: %{},
+        vote_started: false,
+        vote_options: [],
+        voted_user: MapSet.new(),
+        vote_answers: []
       )
 
     socket =
@@ -34,7 +38,7 @@ defmodule GoplayPluginWeb.Tools.Vote.AppLive do
             host: host,
             slug: slug,
             event: event,
-            page_title: event.title,
+            page_title: "#{event.title} - Vote",
             status: event.status
           )
 
@@ -60,14 +64,9 @@ defmodule GoplayPluginWeb.Tools.Vote.AppLive do
   end
 
   def handle_cast({:chat_fetched, chat}, %{assigns: %{vanguard: vg, host: host}} = socket) do
-    chat_url =
-      if host == "goplay.co.id" do
-        "wss://gschat.goplay.co.id/chat"
-      else
-        "wss://g-gschat.goplay.co.id/chat"
-      end
-
-    chat = Map.put(chat, :url, chat_url)
+    chat =
+      Map.put(chat, :event_host, host)
+      |> Map.put(:recon, true)
 
     socket = assign(socket, chat_setting: chat, vanguard: nil)
     GenServer.stop(vg)
@@ -76,7 +75,7 @@ defmodule GoplayPluginWeb.Tools.Vote.AppLive do
   end
 
   def handle_cast(:chat_connect, %{assigns: %{chat_setting: setting}} = socket) do
-    {:ok, chat_ws} = Chat.start_link(setting.url, self(), setting)
+    {:ok, chat_ws} = Chat.start_link(setting, self())
     socket = assign(socket, chat_ws: chat_ws)
     GenServer.cast(self(), :chat_join)
     {:noreply, socket}
@@ -92,10 +91,29 @@ defmodule GoplayPluginWeb.Tools.Vote.AppLive do
   end
 
   def handle_chat(
-        %{"ct" => 20, "id" => id, "msg" => msg, "frm" => frm},
+        %{"ct" => 20, "id" => id, "msg" => msg, "frm" => frm} = chat,
         socket
       ) do
-    {:noreply, socket}
+    msg = String.trim(msg) |> String.split()
+
+    with ["vote", option | _] <- msg,
+         {option, _} <- Integer.parse(option),
+         true <- socket.assigns.vote_started,
+         true <- 0 < option && option <= length(socket.assigns.vote_options),
+         # TODO: Fix line below to true <- for unique user voting
+         _ <- MapSet.member?(socket.assigns.voted_user, frm) do
+      IO.puts("#{frm} selected option #{option}")
+      option = option - 1
+
+      socket =
+        update(socket, :voted_user, &MapSet.put(&1, frm))
+        |> update(:vote_answers, &[option | &1])
+
+      {:noreply, socket}
+    else
+      _ ->
+        {:noreply, socket}
+    end
   end
 
   def handle_chat(
@@ -114,6 +132,36 @@ defmodule GoplayPluginWeb.Tools.Vote.AppLive do
   end
 
   def handle_chat(_item, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("start-vote", _params, socket) do
+    socket = assign(socket, vote_started: true, voted_users: MapSet.new(), vote_answers: [])
+    {:noreply, socket}
+  end
+
+  def handle_event("stop-vote", _params, socket) do
+    socket = assign(socket, vote_started: false)
+    {:noreply, socket}
+  end
+
+  def handle_event("add-option", %{"form" => %{"name" => name}}, socket) do
+    socket = update(socket, :vote_options, fn vote -> vote ++ [name] end)
+    {:noreply, socket}
+  end
+
+  def handle_event("clear-option", _, socket) do
+    socket = assign(socket, vote_options: [], vote_answers: [])
+    {:noreply, socket}
+  end
+
+  def handle_event("delete-option", %{"idx" => idx}, socket) do
+    socket =
+      update(socket, :vote_options, fn vote ->
+        List.delete_at(vote, String.to_integer(idx))
+      end)
+      |> assign(vote_answers: [])
+
     {:noreply, socket}
   end
 end

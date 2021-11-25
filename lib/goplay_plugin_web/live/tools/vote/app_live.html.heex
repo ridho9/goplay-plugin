@@ -1,5 +1,7 @@
-<div class="fixed top-0 right-0 border rounded bg-white p-1 max-w-sm">
+<div class="fixed top-0 right-0 border rounded bg-white p-1 pl-2 max-w-sm">
   <p class="font-bold">Plugin Control</p>
+  <hr class="my-1">
+
   <p>Event: <%= @slug %></p>
   <%= if @status == "finished" do %>
     <p>Event is finished</p>
@@ -12,5 +14,71 @@
     <% else %>
       <p>Chat loaded</p>
     <% end %>
+  <% end %>
+  <hr class="my-1">
+
+  <%= if @vote_started do%> 
+    <p>Vote running</p>
+    <div>
+      <button class="border rounded p-1" phx-click="stop-vote">Stop Vote</button>
+    </div>
+  <% else %>
+    <p>Vote not running</p>
+    <div>
+      <%= if length(@vote_options) == 0 do %>
+        <p>Add some options first</p>
+      <% else %>
+        <button class="border rounded p-1" phx-click="start-vote">Start Vote</button>
+      <% end %>
+    </div>
+  <% end %>
+
+  <hr class="my-1">
+
+  <.form let={f} for={:form} phx-submit="add-option">
+    <div class="mb-1">
+      <%= label f, :name, "Option name", class: "block" %>
+      <%= text_input f, :name, class: "block border rounded w-1/2 disabled:bg-gray-400 px-1", required: true, disabled: @vote_started %>
+    </div>
+    <div class="mt-2">
+      <%= submit "Add", class: "border rounded p-1 px-4 disabled:bg-gray-400", disabled: @vote_started %>
+    </div>
+  </.form>
+  <button class="border rounded p-1 my-4 disabled:bg-gray-400" phx-click="clear-option" disabled={@vote_started}>Clear Options</button>
+</div>
+
+<div class="vote-container fixed top-0 left-0 w-96 border rounded p-4 bg-white">
+  <p class="font-bold text-2xl">Vote</p>
+
+  <% total_vote = length(@vote_answers) %>
+
+  <%= if @vote_started || total_vote != 0 do %>
+    <p>Total Votes: <%= total_vote %> votes</p>
+  <% end %>
+
+  <%= for {val, idx} <- Enum.with_index(@vote_options) do %>
+
+    <div class="flex items-center">
+      <div class="border rounded bg-white flex p-1 m-2 items-center flex-grow overflow-hidden relative">
+        <p class="mx-2 w-2 z-10"><%= idx + 1 %></p>
+        <p class="flex-grow z-10"><%= val %></p>
+        
+        <%= if @vote_started || total_vote != 0 do %>
+          <% this_vote = Enum.count(@vote_answers, &(&1 == idx)) %>
+          <% this_percent = if total_vote == 0, do: 0.0, else: (this_vote/total_vote) * 100 %>
+          <p class="z-10"><%= "(#{:erlang.float_to_binary(this_percent, [decimals: 1])}%) #{this_vote}/#{total_vote}" %></p>
+
+          <div {[class: "absolute bg-blue-200 h-full left-0", style: "width: #{this_percent}%;"]}></div>
+        <% end %>
+
+      </div>
+      <%= if !@vote_started do %>
+        <button class="border rounded p-1" phx-click="delete-option" phx-value-idx={idx}>Delete</button>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%= if @vote_started do %>
+    <p>Vote by chatting "vote (number)", each vote only counts one</p>
   <% end %>
 </div>

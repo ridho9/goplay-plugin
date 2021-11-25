@@ -1,4 +1,8 @@
 <div class="p-4">
   <h1 class="font-bold text-lg mb-2">Goplay Tools</h1>
-  <%= link("Chat", to: "/tools/chat", class: "block border rounded p-1 w-40 text-center") %>
+
+  <% routes = [{"Chat", "/tools/chat"}, {"Vote", "/tools/vote"}] %>
+  <%= for {name, link} <- routes do %>
+    <a class="block border rounded p-1 w-40 text-center my-2 hover:bg-blue-200" href={link}><%= name %></a>
+  <% end %>
 </div>

@@ -20,6 +20,7 @@ defmodule GoplayPlugin.WS.Chat do
       chat_url,
       __MODULE__,
       %{callback_pid: callback_pid, setting: setting},
+      # debug: [:trace],
       ssl_options: ssl_opts
     )
   end
@@ -70,7 +71,7 @@ defmodule GoplayPlugin.WS.Chat do
       {:close, state}
     else
       Process.send_after(self(), :monitor, 1000)
-      {:ok, state}
+      {:reply, :ping, state}
     end
   end
 
