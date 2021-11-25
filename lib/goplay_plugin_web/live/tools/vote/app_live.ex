@@ -101,8 +101,7 @@ defmodule GoplayPluginWeb.Tools.Vote.AppLive do
          true <- socket.assigns.vote_started,
          true <- 0 < option && option <= length(socket.assigns.vote_options),
          # TODO: Fix line below to true <- for unique user voting
-         _ <- MapSet.member?(socket.assigns.voted_user, frm) do
-      IO.puts("#{frm} selected option #{option}")
+         true <- MapSet.member?(socket.assigns.voted_user, frm) do
       option = option - 1
 
       socket =
